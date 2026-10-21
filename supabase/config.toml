@@ -1,0 +1,5 @@
+project_id = "akshath-fit"
+[auth]
+enable_signup = false
+[auth.email]
+enable_signup = false
