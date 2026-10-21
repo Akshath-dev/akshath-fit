@@ -1,6 +1,199 @@
-import {useId} from 'react';
-import {prettyDate} from '../lib/dates';
-import type {DashboardSummary} from '../lib/metrics';
-export function ProgressRing({value,target,label}:{value:number|null;target:number|null;label:string}){const ratio=value!=null&&target&&target>0?Math.min(1,Math.max(0,value/target)):0;return <div className="progress-ring" role="img" aria-label={label}><svg viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="56" className="ring-track"/><circle cx="70" cy="70" r="56" className="ring-fill" strokeDasharray={`${ratio*351.86} 351.86`}/></svg><div className="ring-label"><strong>{value==null?'—':value.toLocaleString('en-IN')}</strong><span>steps</span></div></div>}
-export function WeekBars({week,selectedDate}:{week:DashboardSummary['week'];selectedDate:string}){const max=Math.max(2,...week.days.map(d=>d.strength+d.cardio));return <div className="week-bars">{week.days.map(day=><div className={`week-day ${day.date===selectedDate?'today':''}`} key={day.date} role="img" aria-label={`${prettyDate(day.date,{weekday:'long'})}: ${day.strength} strength and ${day.cardio} cardio sessions`}><div className="week-track"><div className="week-fill" style={{height:`${(day.strength+day.cardio)/max*100}%`}}>{day.cardio>0&&<span className="cardio-fill" style={{flex:day.cardio}}/>}{day.strength>0&&<span className="strength-fill" style={{flex:day.strength}}/>}</div></div><span className="weekday-label">{prettyDate(day.date,{weekday:'short'}).slice(0,2)}</span></div>)}</div>}
-export function WeightChart({points,start,end,mini=false}:{points:{date:string;weightKg:number|null}[];start:string;end:string;mini?:boolean}){const id=useId().replace(/:/g,''),values=points.filter(p=>p.weightKg!=null&&p.date>=start&&p.date<=end).sort((a,b)=>a.date.localeCompare(b.date));if(values.length<2)return <div className={mini?'mini-empty':'chart-empty'}>{values.length===1?'One measurement. Add another to see a trend.':'Your weight trend will appear here.'}</div>;const width=600,height=mini?130:235,left=mini?4:44,right=10,top=18,bottom=mini?10:36;const numbers=values.map(p=>p.weightKg!),min=Math.min(...numbers)-.4,max=Math.max(...numbers)+.4,day=(d:string)=>new Date(`${d}T12:00:00Z`).getTime(),span=Math.max(86400000,day(end)-day(start));const xy=values.map(p=>({x:left+(day(p.date)-day(start))/span*(width-left-right),y:top+(max-p.weightKg!)/(max-min)*(height-top-bottom),...p})),line=xy.map((p,i)=>`${i?'L':'M'}${p.x},${p.y}`).join(' ');return <svg className={`weight-chart ${mini?'mini-chart':''}`} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Weight measurements from ${prettyDate(values[0].date)} to ${prettyDate(values.at(-1)!.date)} in kilograms`}><defs><linearGradient id={`weight-${id}`} x1="0" x2="0" y1="0" y2="1"><stop stopColor="#8170ff" stopOpacity=".25"/><stop offset="1" stopColor="#8170ff" stopOpacity="0"/></linearGradient></defs>{!mini&&[0,.5,1].map(r=><g key={r}><line x1={left} x2={width-right} y1={top+r*(height-top-bottom)} y2={top+r*(height-top-bottom)} stroke="#414147" strokeDasharray="3 6"/><text x="0" y={top+r*(height-top-bottom)+4} fill="#adadb5" fontSize="10">{(max-r*(max-min)).toFixed(1)}</text></g>)}<path d={`${line} L${xy.at(-1)!.x},${height-bottom} L${xy[0].x},${height-bottom} Z`} fill={`url(#weight-${id})`}/><path d={line} fill="none" stroke="#9b8aff" strokeWidth={mini?4:2.5} strokeLinejoin="round" strokeLinecap="round"/>{!mini&&xy.map(p=><circle key={p.date} cx={p.x} cy={p.y} r="4" fill="#ac9dff" stroke="#252527" strokeWidth="2"><title>{prettyDate(p.date)}: {p.weightKg} kg</title></circle>)}{!mini&&<><text x={left} y={height-4} fill="#adadb5" fontSize="10">{prettyDate(start)}</text><text x={width-right} y={height-4} textAnchor="end" fill="#adadb5" fontSize="10">{prettyDate(end)}</text></>}</svg>}
+import { useId } from "react";
+import { prettyDate } from "../lib/dates";
+import type { DashboardSummary } from "../lib/metrics";
+export function ProgressRing({
+  value,
+  target,
+  label,
+}: {
+  value: number | null;
+  target: number | null;
+  label: string;
+}) {
+  const ratio =
+    value != null && target && target > 0
+      ? Math.min(1, Math.max(0, value / target))
+      : 0;
+  return (
+    <div className="progress-ring" role="img" aria-label={label}>
+      <svg viewBox="0 0 140 140" aria-hidden="true">
+        <circle cx="70" cy="70" r="56" className="ring-track" />
+        <circle
+          cx="70"
+          cy="70"
+          r="56"
+          className="ring-fill"
+          strokeDasharray={`${ratio * 351.86} 351.86`}
+        />
+      </svg>
+      <div className="ring-label">
+        <strong>{value == null ? "—" : value.toLocaleString("en-IN")}</strong>
+        <span>steps</span>
+      </div>
+    </div>
+  );
+}
+export function WeekBars({
+  week,
+  selectedDate,
+}: {
+  week: DashboardSummary["week"];
+  selectedDate: string;
+}) {
+  const max = Math.max(2, ...week.days.map((d) => d.strength + d.cardio));
+  return (
+    <div className="week-bars">
+      {week.days.map((day) => (
+        <div
+          className={`week-day ${day.date === selectedDate ? "today" : ""}`}
+          key={day.date}
+          role="img"
+          aria-label={`${prettyDate(day.date, { weekday: "long" })}: ${day.strength} strength and ${day.cardio} cardio sessions`}
+        >
+          <div className="week-track">
+            <div
+              className="week-fill"
+              style={{
+                height: `${((day.strength + day.cardio) / max) * 100}%`,
+              }}
+            >
+              {day.cardio > 0 && (
+                <span className="cardio-fill" style={{ flex: day.cardio }} />
+              )}
+              {day.strength > 0 && (
+                <span
+                  className="strength-fill"
+                  style={{ flex: day.strength }}
+                />
+              )}
+            </div>
+          </div>
+          <span className="weekday-label">
+            {prettyDate(day.date, { weekday: "short" }).slice(0, 2)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+export function WeightChart({
+  points,
+  start,
+  end,
+  mini = false,
+}: {
+  points: { date: string; weightKg: number | null }[];
+  start: string;
+  end: string;
+  mini?: boolean;
+}) {
+  const id = useId().replace(/:/g, ""),
+    values = points
+      .filter((p) => p.weightKg != null && p.date >= start && p.date <= end)
+      .sort((a, b) => a.date.localeCompare(b.date));
+  if (values.length < 2)
+    return (
+      <div className={mini ? "mini-empty" : "chart-empty"}>
+        {values.length === 1
+          ? "One measurement. Add another to see a trend."
+          : "Your weight trend will appear here."}
+      </div>
+    );
+  const width = 600,
+    height = mini ? 130 : 235,
+    left = mini ? 4 : 44,
+    right = 10,
+    top = 18,
+    bottom = mini ? 10 : 36;
+  const numbers = values.map((p) => p.weightKg!),
+    min = Math.min(...numbers) - 0.4,
+    max = Math.max(...numbers) + 0.4,
+    day = (d: string) => new Date(`${d}T12:00:00Z`).getTime(),
+    span = Math.max(86400000, day(end) - day(start));
+  const xy = values.map((p) => ({
+      x: left + ((day(p.date) - day(start)) / span) * (width - left - right),
+      y: top + ((max - p.weightKg!) / (max - min)) * (height - top - bottom),
+      ...p,
+    })),
+    line = xy.map((p, i) => `${i ? "L" : "M"}${p.x},${p.y}`).join(" ");
+  return (
+    <svg
+      className={`weight-chart ${mini ? "mini-chart" : ""}`}
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label={`Weight measurements from ${prettyDate(values[0].date)} to ${prettyDate(values.at(-1)!.date)} in kilograms`}
+    >
+      <defs>
+        <linearGradient id={`weight-${id}`} x1="0" x2="0" y1="0" y2="1">
+          <stop stopColor="#8170ff" stopOpacity=".25" />
+          <stop offset="1" stopColor="#8170ff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {!mini &&
+        [0, 0.5, 1].map((r) => (
+          <g key={r}>
+            <line
+              x1={left}
+              x2={width - right}
+              y1={top + r * (height - top - bottom)}
+              y2={top + r * (height - top - bottom)}
+              stroke="#414147"
+              strokeDasharray="3 6"
+            />
+            <text
+              x="0"
+              y={top + r * (height - top - bottom) + 4}
+              fill="#adadb5"
+              fontSize="10"
+            >
+              {(max - r * (max - min)).toFixed(1)}
+            </text>
+          </g>
+        ))}
+      <path
+        d={`${line} L${xy.at(-1)!.x},${height - bottom} L${xy[0].x},${height - bottom} Z`}
+        fill={`url(#weight-${id})`}
+      />
+      <path
+        d={line}
+        fill="none"
+        stroke="#9b8aff"
+        strokeWidth={mini ? 4 : 2.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {!mini &&
+        xy.map((p) => (
+          <circle
+            key={p.date}
+            cx={p.x}
+            cy={p.y}
+            r="4"
+            fill="#ac9dff"
+            stroke="#252527"
+            strokeWidth="2"
+          >
+            <title>
+              {prettyDate(p.date)}: {p.weightKg} kg
+            </title>
+          </circle>
+        ))}
+      {!mini && (
+        <>
+          <text x={left} y={height - 4} fill="#adadb5" fontSize="10">
+            {prettyDate(start)}
+          </text>
+          <text
+            x={width - right}
+            y={height - 4}
+            textAnchor="end"
+            fill="#adadb5"
+            fontSize="10"
+          >
+            {prettyDate(end)}
+          </text>
+        </>
+      )}
+    </svg>
+  );
+}

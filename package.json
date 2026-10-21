@@ -27,6 +27,7 @@
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
     "jsdom": "26.1.0",
+    "prettier": "3.9.10",
     "typescript": "latest",
     "vite": "latest",
     "vitest": "latest"

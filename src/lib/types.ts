@@ -1,14 +1,63 @@
 export type LocalDate = string;
-export type Route = 'overview'|'training'|'nutrition'|'progress'|'plan'|'settings';
-export type SessionKind = 'strength'|'cardio';
-export type Goals = { calories:number|null;protein:number|null;carbs:number|null;fat:number|null;steps:number|null;weeklyTraining:number|null };
-export type Profile = {userId:string;displayName:string;timeZone:string};
-export type MuscleGroup = {id:string;name:string;isCustom:boolean};
-export type TrainingInput = {id?:string;date:LocalDate;kind:SessionKind;activityType:string|null;durationMinutes:number|null;distanceKm:number|null;notes:string;muscleGroupIds:string[]};
-export type TrainingSession = TrainingInput & {id:string;createdAt:string};
-export type NutritionInput = {date:LocalDate;calories:number|null;protein:number|null;carbs:number|null;fat:number|null;notes:string};
-export type CheckinInput = {date:LocalDate;steps:number|null;weightKg:number|null;waistCm:number|null;restDay:boolean;notes:string};
-export type DateRange = {start:LocalDate;end:LocalDate};
-export type DashboardSnapshot = {profile:Profile;goals:Goals;muscleGroups:MuscleGroup[];training:TrainingSession[];nutrition:NutritionInput[];checkins:CheckinInput[];latestWeight:CheckinInput|null};
-export type ValidationResult<T> = {ok:true;value:T}|{ok:false;errors:Record<string,string>};
-export type EditorRequest={type:'training';kind?:SessionKind;initial?:TrainingSession}|{type:'nutrition';initial?:NutritionInput}|{type:'checkin';initial?:CheckinInput}|{type:'delete';target:'training'|'nutrition'|'checkin';id:string;label:string};
+export type Route =
+  "overview" | "training" | "nutrition" | "progress" | "plan" | "settings";
+export type SessionKind = "strength" | "cardio";
+export type Goals = {
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  steps: number | null;
+  weeklyTraining: number | null;
+};
+export type Profile = { userId: string; displayName: string; timeZone: string };
+export type MuscleGroup = { id: string; name: string; isCustom: boolean };
+export type TrainingInput = {
+  id?: string;
+  date: LocalDate;
+  kind: SessionKind;
+  activityType: string | null;
+  durationMinutes: number | null;
+  distanceKm: number | null;
+  notes: string;
+  muscleGroupIds: string[];
+};
+export type TrainingSession = TrainingInput & { id: string; createdAt: string };
+export type NutritionInput = {
+  date: LocalDate;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  notes: string;
+};
+export type CheckinInput = {
+  date: LocalDate;
+  steps: number | null;
+  weightKg: number | null;
+  waistCm: number | null;
+  restDay: boolean;
+  notes: string;
+};
+export type DateRange = { start: LocalDate; end: LocalDate };
+export type DashboardSnapshot = {
+  profile: Profile;
+  goals: Goals;
+  muscleGroups: MuscleGroup[];
+  training: TrainingSession[];
+  nutrition: NutritionInput[];
+  checkins: CheckinInput[];
+  latestWeight: CheckinInput | null;
+};
+export type ValidationResult<T> =
+  { ok: true; value: T } | { ok: false; errors: Record<string, string> };
+export type EditorRequest =
+  | { type: "training"; kind?: SessionKind; initial?: TrainingSession }
+  | { type: "nutrition"; initial?: NutritionInput }
+  | { type: "checkin"; initial?: CheckinInput }
+  | {
+      type: "delete";
+      target: "training" | "nutrition" | "checkin";
+      id: string;
+      label: string;
+    };

@@ -1,10 +1,358 @@
-import {useState} from 'react';
-import {Dumbbell,Utensils,ShoppingBag,Package,NotebookPen,Check,Clock,ArrowUpRight} from 'lucide-react';
-import {useDashboard} from '../../data/DashboardProvider';
-import {Card,CardTitle,Button} from '../../components/Ui';
-import {TARGETS,DAYS,TRAINING_DAYS,COACH_NOTES,GROCERY,MEAL_PREP,WORKOUT_NUTRITION,SUPPLEMENTS,SUBSTITUTIONS,AVOID_FOODS,CHEAT_MEAL} from '../../data/reference-plan';
-const clean=(s:string)=>s.replace(/^[^\p{L}\p{N}]+/u,'');
-function InfoList({title,items}:{title:string;items:string[]}){return <Card><CardTitle>{clean(title)}</CardTitle><ul className="reference-list">{items.map((item,i)=><li key={i}>{item}</li>)}</ul></Card>}
-export function PlanPage(){const{snapshot}=useDashboard(),[tab,setTab]=useState('training'),[dayId,setDay]=useState(1),[mealDay,setMealDay]=useState(0);const storageKey=`akshath-fit:plan-checks:${snapshot?.profile.userId}`;const[checks,setChecks]=useState<Record<string,boolean>>(()=>{try{const value=JSON.parse(localStorage.getItem(storageKey)||localStorage.getItem('akshath-training-checks')||'{}');return value&&typeof value==='object'&&!Array.isArray(value)&&Object.values(value).every(v=>typeof v==='boolean')?value:{}}catch{return {}}}),[storageError,setStorageError]=useState(false);function persist(value:Record<string,boolean>){setChecks(value);try{localStorage.setItem(storageKey,JSON.stringify(value));setStorageError(false)}catch{setStorageError(true)}}const day=TRAINING_DAYS.find(d=>d.id===dayId)!,done=day.exercises.filter((_,i)=>checks[`${day.id}-${i}`]).length;
- return <div className="page-stack"><div className="plan-tabs" role="tablist" aria-label="Plan sections">{[{id:'training',label:'Training',icon:Dumbbell},{id:'meals',label:'Meals',icon:Utensils},{id:'groceries',label:'Groceries',icon:ShoppingBag},{id:'prep',label:'Meal prep',icon:Package},{id:'extras',label:'Extras',icon:NotebookPen}].map(({id,label,icon:Icon})=><button key={id} role="tab" aria-selected={tab===id} className={tab===id?'active':''} onClick={()=>setTab(id)}><Icon size={16}/>{label}</button>)}</div>{tab==='training'?<><div className="plan-days">{TRAINING_DAYS.map(d=><button key={d.id} aria-pressed={dayId===d.id} className={dayId===d.id?'active':''} onClick={()=>setDay(d.id)}><small>DAY</small><strong>{d.id.toString().padStart(2,'0')}</strong></button>)}</div><Card className="training-reference"><div className="training-reference-header"><div><span className="tag-pill">{day.tag}</span><h2>{day.title}</h2><p>Plan checklist · {done}/{day.exercises.length} checked</p></div><Dumbbell size={33}/></div><p className="plan-aid-note">A reference for your session. Checking these items does not create a workout log.</p><div className="reference-exercises">{day.exercises.map((ex,i)=>{const key=`${day.id}-${i}`,checked=!!checks[key];return <button key={key} className={checked?'checked':''} aria-pressed={checked} onClick={()=>persist({...checks,[key]:!checks[key]})}><span className="exercise-checkbox">{checked?<Check size={13}/>:null}</span><span><strong>{ex.name}</strong>{ex.sets&&<small>{ex.sets} sets <span>·</span> {ex.reps} reps <span>·</span> {ex.load}</small>}{'note' in ex&&ex.note&&<p>{ex.note}</p>}</span><ArrowUpRight size={15}/></button>})}</div>{done>0&&<Button variant="ghost" onClick={()=>persist(Object.fromEntries(Object.entries(checks).filter(([key])=>!key.startsWith(`${day.id}-`))))}>Reset this checklist</Button>}{storageError&&<p className="field-error">Your browser couldn’t save this checklist. The current checks remain on screen.</p>}</Card><div className="reference-coach"><span className="eyebrow">FROM YOUR ORIGINAL PLAN</span><p>{COACH_NOTES[day.id as keyof typeof COACH_NOTES]}</p></div></>:tab==='meals'?<><div className="plan-targets"><span>Plan reference targets</span><strong>{TARGETS.kcal} <small>kcal</small></strong><strong>{TARGETS.protein}g <small>protein</small></strong><strong>{TARGETS.carbs}g <small>carbs</small></strong><strong>{TARGETS.fat}g <small>fat</small></strong></div><div className="meal-day-nav">{DAYS.map((d,i)=><button key={d.id} className={i===mealDay?'active':''} onClick={()=>setMealDay(i)}>{d.title.split('—')[0].trim()}</button>)}</div><div className="section-intro"><h2>{DAYS[mealDay].title}</h2><p>{DAYS[mealDay].subtitle}</p></div><div className="meal-grid">{DAYS[mealDay].meals.map(m=><Card key={m.name} className="reference-meal"><CardTitle action={<span className="meal-time"><Clock size={11}/>{m.time}</span>}>{clean(m.name)}</CardTitle><div className="meal-macros"><span>{m.kcal} kcal</span><span>{m.p}g protein</span><span>{m.c}g carbs</span><span>{m.f}g fat</span></div><ul className="reference-list">{m.items.map(item=><li key={item}>{item}</li>)}</ul></Card>)}</div><Card><div className="meal-totals"><span>Planned daily total</span><strong>{DAYS[mealDay].totals.kcal}<small> kcal</small></strong><strong>{DAYS[mealDay].totals.p}<small> g protein</small></strong></div><p className="tiny muted">Reference meals do not count as food consumed. Record actual totals in Nutrition.</p></Card><div className="reference-grid">{WORKOUT_NUTRITION.map(info=><InfoList key={info.title} {...info}/>)}</div></>:tab==='groceries'?<><div className="section-intro"><h2>Your weekly grocery list</h2><p>Quantities and cost estimates retained from your original plan.</p></div>{GROCERY.map(group=><Card key={group.cat}><CardTitle>{clean(group.cat)}</CardTitle><div className="table-wrap"><table className="data-table grocery-table"><thead><tr><th>Item</th><th>Quantity</th><th>Plan estimate</th></tr></thead><tbody>{group.items.map(item=><tr key={item.name}><td>{item.name}</td><td>{item.qty}</td><td>{item.cost}</td></tr>)}</tbody></table></div></Card>)}</>:tab==='prep'?<div className="reference-grid">{MEAL_PREP.map(info=><InfoList key={info.title} {...info}/>)}</div>:<><Card><CardTitle>Supplement reference</CardTitle><div className="table-wrap"><table className="data-table supplement-table"><thead><tr><th>Supplement</th><th>Original dose</th><th>Notes from your plan</th><th>Priority</th></tr></thead><tbody>{SUPPLEMENTS.map(s=><tr key={s.name}><td>{s.name}</td><td>{s.dose}</td><td>{s.why}</td><td>{s.priority}</td></tr>)}</tbody></table></div></Card><Card><CardTitle>Food substitutions</CardTitle><div className="substitution-list">{SUBSTITUTIONS.map(s=><div key={s.original}><strong>{s.original}</strong><p>{s.alts}</p></div>)}</div></Card><div className="reference-grid"><InfoList title="Foods to limit — original plan" items={AVOID_FOODS}/><InfoList title="Flexible meals — original plan" items={CHEAT_MEAL}/></div></>}</div>
+import { useState } from "react";
+import {
+  Dumbbell,
+  Utensils,
+  ShoppingBag,
+  Package,
+  NotebookPen,
+  Check,
+  Clock,
+  ArrowUpRight,
+} from "lucide-react";
+import { useDashboard } from "../../data/DashboardProvider";
+import { Card, CardTitle, Button } from "../../components/Ui";
+import {
+  TARGETS,
+  DAYS,
+  TRAINING_DAYS,
+  COACH_NOTES,
+  GROCERY,
+  MEAL_PREP,
+  WORKOUT_NUTRITION,
+  SUPPLEMENTS,
+  SUBSTITUTIONS,
+  AVOID_FOODS,
+  CHEAT_MEAL,
+} from "../../data/reference-plan";
+const clean = (s: string) => s.replace(/^[^\p{L}\p{N}]+/u, "");
+function InfoList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <Card>
+      <CardTitle>{clean(title)}</CardTitle>
+      <ul className="reference-list">
+        {items.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+export function PlanPage() {
+  const { snapshot } = useDashboard(),
+    [tab, setTab] = useState("training"),
+    [dayId, setDay] = useState(1),
+    [mealDay, setMealDay] = useState(0);
+  const storageKey = `akshath-fit:plan-checks:${snapshot?.profile.userId}`;
+  const [checks, setChecks] = useState<Record<string, boolean>>(() => {
+      try {
+        const value = JSON.parse(
+          localStorage.getItem(storageKey) ||
+            localStorage.getItem("akshath-training-checks") ||
+            "{}",
+        );
+        return value &&
+          typeof value === "object" &&
+          !Array.isArray(value) &&
+          Object.values(value).every((v) => typeof v === "boolean")
+          ? value
+          : {};
+      } catch {
+        return {};
+      }
+    }),
+    [storageError, setStorageError] = useState(false);
+  function persist(value: Record<string, boolean>) {
+    setChecks(value);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(value));
+      setStorageError(false);
+    } catch {
+      setStorageError(true);
+    }
+  }
+  const day = TRAINING_DAYS.find((d) => d.id === dayId)!,
+    done = day.exercises.filter((_, i) => checks[`${day.id}-${i}`]).length;
+  return (
+    <div className="page-stack">
+      <div className="plan-tabs" role="tablist" aria-label="Plan sections">
+        {[
+          { id: "training", label: "Training", icon: Dumbbell },
+          { id: "meals", label: "Meals", icon: Utensils },
+          { id: "groceries", label: "Groceries", icon: ShoppingBag },
+          { id: "prep", label: "Meal prep", icon: Package },
+          { id: "extras", label: "Extras", icon: NotebookPen },
+        ].map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            className={tab === id ? "active" : ""}
+            onClick={() => setTab(id)}
+          >
+            <Icon size={16} />
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === "training" ? (
+        <>
+          <div className="plan-days">
+            {TRAINING_DAYS.map((d) => (
+              <button
+                key={d.id}
+                aria-pressed={dayId === d.id}
+                className={dayId === d.id ? "active" : ""}
+                onClick={() => setDay(d.id)}
+              >
+                <small>DAY</small>
+                <strong>{d.id.toString().padStart(2, "0")}</strong>
+              </button>
+            ))}
+          </div>
+          <Card className="training-reference">
+            <div className="training-reference-header">
+              <div>
+                <span className="tag-pill">{day.tag}</span>
+                <h2>{day.title}</h2>
+                <p>
+                  Plan checklist · {done}/{day.exercises.length} checked
+                </p>
+              </div>
+              <Dumbbell size={33} />
+            </div>
+            <p className="plan-aid-note">
+              A reference for your session. Checking these items does not create
+              a workout log.
+            </p>
+            <div className="reference-exercises">
+              {day.exercises.map((ex, i) => {
+                const key = `${day.id}-${i}`,
+                  checked = !!checks[key];
+                return (
+                  <button
+                    key={key}
+                    className={checked ? "checked" : ""}
+                    aria-pressed={checked}
+                    onClick={() => persist({ ...checks, [key]: !checks[key] })}
+                  >
+                    <span className="exercise-checkbox">
+                      {checked ? <Check size={13} /> : null}
+                    </span>
+                    <span>
+                      <strong>{ex.name}</strong>
+                      {ex.sets && (
+                        <small>
+                          {ex.sets} sets <span>·</span> {ex.reps} reps{" "}
+                          <span>·</span> {ex.load}
+                        </small>
+                      )}
+                      {"note" in ex && ex.note && <p>{ex.note}</p>}
+                    </span>
+                    <ArrowUpRight size={15} />
+                  </button>
+                );
+              })}
+            </div>
+            {done > 0 && (
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  persist(
+                    Object.fromEntries(
+                      Object.entries(checks).filter(
+                        ([key]) => !key.startsWith(`${day.id}-`),
+                      ),
+                    ),
+                  )
+                }
+              >
+                Reset this checklist
+              </Button>
+            )}
+            {storageError && (
+              <p className="field-error">
+                Your browser couldn’t save this checklist. The current checks
+                remain on screen.
+              </p>
+            )}
+          </Card>
+          <div className="reference-coach">
+            <span className="eyebrow">FROM YOUR ORIGINAL PLAN</span>
+            <p>{COACH_NOTES[day.id as keyof typeof COACH_NOTES]}</p>
+          </div>
+        </>
+      ) : tab === "meals" ? (
+        <>
+          <div className="plan-targets">
+            <span>Plan reference targets</span>
+            <strong>
+              {TARGETS.kcal} <small>kcal</small>
+            </strong>
+            <strong>
+              {TARGETS.protein}g <small>protein</small>
+            </strong>
+            <strong>
+              {TARGETS.carbs}g <small>carbs</small>
+            </strong>
+            <strong>
+              {TARGETS.fat}g <small>fat</small>
+            </strong>
+          </div>
+          <div className="meal-day-nav">
+            {DAYS.map((d, i) => (
+              <button
+                key={d.id}
+                className={i === mealDay ? "active" : ""}
+                onClick={() => setMealDay(i)}
+              >
+                {d.title.split("—")[0].trim()}
+              </button>
+            ))}
+          </div>
+          <div className="section-intro">
+            <h2>{DAYS[mealDay].title}</h2>
+            <p>{DAYS[mealDay].subtitle}</p>
+          </div>
+          <div className="meal-grid">
+            {DAYS[mealDay].meals.map((m) => (
+              <Card key={m.name} className="reference-meal">
+                <CardTitle
+                  action={
+                    <span className="meal-time">
+                      <Clock size={11} />
+                      {m.time}
+                    </span>
+                  }
+                >
+                  {clean(m.name)}
+                </CardTitle>
+                <div className="meal-macros">
+                  <span>{m.kcal} kcal</span>
+                  <span>{m.p}g protein</span>
+                  <span>{m.c}g carbs</span>
+                  <span>{m.f}g fat</span>
+                </div>
+                <ul className="reference-list">
+                  {m.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
+          <Card>
+            <div className="meal-totals">
+              <span>Planned daily total</span>
+              <strong>
+                {DAYS[mealDay].totals.kcal}
+                <small> kcal</small>
+              </strong>
+              <strong>
+                {DAYS[mealDay].totals.p}
+                <small> g protein</small>
+              </strong>
+            </div>
+            <p className="tiny muted">
+              Reference meals do not count as food consumed. Record actual
+              totals in Nutrition.
+            </p>
+          </Card>
+          <div className="reference-grid">
+            {WORKOUT_NUTRITION.map((info) => (
+              <InfoList key={info.title} {...info} />
+            ))}
+          </div>
+        </>
+      ) : tab === "groceries" ? (
+        <>
+          <div className="section-intro">
+            <h2>Your weekly grocery list</h2>
+            <p>
+              Quantities and cost estimates retained from your original plan.
+            </p>
+          </div>
+          {GROCERY.map((group) => (
+            <Card key={group.cat}>
+              <CardTitle>{clean(group.cat)}</CardTitle>
+              <div className="table-wrap">
+                <table className="data-table grocery-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Quantity</th>
+                      <th>Plan estimate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.items.map((item) => (
+                      <tr key={item.name}>
+                        <td>{item.name}</td>
+                        <td>{item.qty}</td>
+                        <td>{item.cost}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          ))}
+        </>
+      ) : tab === "prep" ? (
+        <div className="reference-grid">
+          {MEAL_PREP.map((info) => (
+            <InfoList key={info.title} {...info} />
+          ))}
+        </div>
+      ) : (
+        <>
+          <Card>
+            <CardTitle>Supplement reference</CardTitle>
+            <div className="table-wrap">
+              <table className="data-table supplement-table">
+                <thead>
+                  <tr>
+                    <th>Supplement</th>
+                    <th>Original dose</th>
+                    <th>Notes from your plan</th>
+                    <th>Priority</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {SUPPLEMENTS.map((s) => (
+                    <tr key={s.name}>
+                      <td>{s.name}</td>
+                      <td>{s.dose}</td>
+                      <td>{s.why}</td>
+                      <td>{s.priority}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+          <Card>
+            <CardTitle>Food substitutions</CardTitle>
+            <div className="substitution-list">
+              {SUBSTITUTIONS.map((s) => (
+                <div key={s.original}>
+                  <strong>{s.original}</strong>
+                  <p>{s.alts}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <div className="reference-grid">
+            <InfoList
+              title="Foods to limit — original plan"
+              items={AVOID_FOODS}
+            />
+            <InfoList
+              title="Flexible meals — original plan"
+              items={CHEAT_MEAL}
+            />
+          </div>
+        </>
+      )}
+    </div>
+  );
 }

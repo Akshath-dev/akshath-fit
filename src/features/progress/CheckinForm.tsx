@@ -1,6 +1,120 @@
-import {useState,type FormEvent} from 'react';
-import type {CheckinInput} from '../../lib/types';
-import {validateCheckin,type CheckinFormValues} from '../../lib/validation';
-import {Field,ErrorNotice} from '../../components/Ui';
-import {EntryActions,useEntrySave} from '../../components/EntrySheet';
-export function CheckinForm({date,initial,onSave,onCancel}:{date:string;initial?:CheckinInput;onSave:(input:CheckinInput)=>Promise<void>;onCancel:()=>void}){const[v,setV]=useState<CheckinFormValues>({date:initial?.date||date,steps:initial?.steps?.toString()??'',weightKg:initial?.weightKg?.toString()??'',waistCm:initial?.waistCm?.toString()??'',restDay:initial?.restDay||false,notes:initial?.notes||''}),[errors,setErrors]=useState<Record<string,string>>({});const save=useEntrySave();function update<K extends keyof CheckinFormValues>(key:K,value:CheckinFormValues[K]){setV(s=>({...s,[key]:value}))}function submit(e:FormEvent){e.preventDefault();const result=validateCheckin(v);if(!result.ok){setErrors(result.errors);return}setErrors({});void save.submit(()=>onSave(result.value))}return <form className="entry-form" onSubmit={submit} aria-busy={save.busy}><p className="form-hint">A small check-in. A clearer picture over time.</p><Field label="Date" type="date" required value={v.date} onChange={e=>update('date',e.target.value)} error={errors.date}/><Field label="Steps" type="number" min="0" step="1" value={v.steps} onChange={e=>update('steps',e.target.value)} placeholder="Your daily total" error={errors.steps}/><div className="form-grid"><Field label="Weight (kg)" type="number" min="0" step="any" value={v.weightKg} onChange={e=>update('weightKg',e.target.value)} placeholder="e.g. 75" error={errors.weightKg}/><Field label="Waist (cm)" type="number" min="0" step="any" value={v.waistCm} onChange={e=>update('waistCm',e.target.value)} placeholder="e.g. 82" error={errors.waistCm}/></div><label className="check-label"><input type="checkbox" checked={v.restDay} onChange={e=>update('restDay',e.target.checked)}/><span>Mark as a rest day<small>A day to recover. Adding training will clear this marker.</small></span></label><label className="field"><span>Notes · optional</span><textarea maxLength={2000} value={v.notes} onChange={e=>update('notes',e.target.value)} placeholder="Energy, sleep, or anything on your mind."/></label>{(errors.form||save.error)&&<ErrorNotice message={save.error||errors.form}/>}<EntryActions busy={save.busy} label="Save check-in" onCancel={onCancel}/></form>}
+import { useState, type FormEvent } from "react";
+import type { CheckinInput } from "../../lib/types";
+import { validateCheckin, type CheckinFormValues } from "../../lib/validation";
+import { Field, ErrorNotice } from "../../components/Ui";
+import { EntryActions, useEntrySave } from "../../components/EntrySheet";
+export function CheckinForm({
+  date,
+  initial,
+  onSave,
+  onCancel,
+}: {
+  date: string;
+  initial?: CheckinInput;
+  onSave: (input: CheckinInput) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [v, setV] = useState<CheckinFormValues>({
+      date: initial?.date || date,
+      steps: initial?.steps?.toString() ?? "",
+      weightKg: initial?.weightKg?.toString() ?? "",
+      waistCm: initial?.waistCm?.toString() ?? "",
+      restDay: initial?.restDay || false,
+      notes: initial?.notes || "",
+    }),
+    [errors, setErrors] = useState<Record<string, string>>({});
+  const save = useEntrySave();
+  function update<K extends keyof CheckinFormValues>(
+    key: K,
+    value: CheckinFormValues[K],
+  ) {
+    setV((s) => ({ ...s, [key]: value }));
+  }
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    const result = validateCheckin(v);
+    if (!result.ok) {
+      setErrors(result.errors);
+      return;
+    }
+    setErrors({});
+    void save.submit(() => onSave(result.value));
+  }
+  return (
+    <form className="entry-form" onSubmit={submit} aria-busy={save.busy}>
+      <p className="form-hint">
+        A small check-in. A clearer picture over time.
+      </p>
+      <Field
+        label="Date"
+        type="date"
+        required
+        value={v.date}
+        onChange={(e) => update("date", e.target.value)}
+        error={errors.date}
+      />
+      <Field
+        label="Steps"
+        type="number"
+        min="0"
+        step="1"
+        value={v.steps}
+        onChange={(e) => update("steps", e.target.value)}
+        placeholder="Your daily total"
+        error={errors.steps}
+      />
+      <div className="form-grid">
+        <Field
+          label="Weight (kg)"
+          type="number"
+          min="0"
+          step="any"
+          value={v.weightKg}
+          onChange={(e) => update("weightKg", e.target.value)}
+          placeholder="e.g. 75"
+          error={errors.weightKg}
+        />
+        <Field
+          label="Waist (cm)"
+          type="number"
+          min="0"
+          step="any"
+          value={v.waistCm}
+          onChange={(e) => update("waistCm", e.target.value)}
+          placeholder="e.g. 82"
+          error={errors.waistCm}
+        />
+      </div>
+      <label className="check-label">
+        <input
+          type="checkbox"
+          checked={v.restDay}
+          onChange={(e) => update("restDay", e.target.checked)}
+        />
+        <span>
+          Mark as a rest day
+          <small>
+            A day to recover. Adding training will clear this marker.
+          </small>
+        </span>
+      </label>
+      <label className="field">
+        <span>Notes · optional</span>
+        <textarea
+          maxLength={2000}
+          value={v.notes}
+          onChange={(e) => update("notes", e.target.value)}
+          placeholder="Energy, sleep, or anything on your mind."
+        />
+      </label>
+      {(errors.form || save.error) && (
+        <ErrorNotice message={save.error || errors.form} />
+      )}
+      <EntryActions
+        busy={save.busy}
+        label="Save check-in"
+        onCancel={onCancel}
+      />
+    </form>
+  );
+}

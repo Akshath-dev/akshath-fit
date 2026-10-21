@@ -1,9 +1,156 @@
-import {useState,type ReactNode,type FormEvent} from 'react';
-import {ArrowUpRight,LockKeyhole} from 'lucide-react';
-import {Brand,Button,Field,ErrorNotice} from '../components/Ui';
-export function LoginFrame({children}:{children:ReactNode}){return <div className="login-layout"><header><Brand/><span className="private-pill"><span className="status-dot"/>Private workspace</span></header><div className="login-content"><div className="login-intro"><span className="eyebrow">A LITTLE MORE INTENTIONAL. EVERY DAY.</span><h1>Your fitness,<br/><span>in focus.</span></h1><p>A personal space for your training, nutrition, and the progress in between.</p><div className="login-orbit" aria-hidden="true"><div/><div/><div/><span>MOVE.<br/>FUEL.<br/>REPEAT.</span></div></div><section className="login-card">{children}<span className="login-footnote"><LockKeyhole size={10}/> Personal tracking. One owner. All yours.</span></section></div></div>}
-export function LoginPage({status,error,onSignIn,onSignOut,onRetry}:{status:string;error?:string;onSignIn:(email:string,password:string)=>Promise<void>;onSignOut:()=>Promise<void>;onRetry:()=>void}){
- const[email,setEmail]=useState(''),[password,setPassword]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false);
- async function submit(e:FormEvent){e.preventDefault();if(busy)return;setBusy(true);setMessage('');try{await onSignIn(email.trim(),password)}catch(e){setMessage((e as Error).message)}finally{setBusy(false)}}
- return <LoginFrame><span className="eyebrow">WELCOME TO AKSHATH.FIT</span>{status==='setup-required'?<><h2>Your space is almost ready.</h2><p>Connect your Supabase project to enable your private sign-in.</p><div className="setup-note">Your dashboard will open after your project and owner account are configured.</div></>:status==='checking'?<><h2>Opening your space.</h2><div className="loading-page" style={{minHeight:120}}><span className="spinner"/><p>Checking your account…</p></div></>:status==='unauthorized'?<><h2>Owner access only.</h2><ErrorNotice message="This account is not authorized to open this dashboard."/><Button variant="secondary" onClick={()=>{void onSignOut().catch(e=>setMessage(e.message))}}>Use another account</Button>{message&&<ErrorNotice message={message}/>}</>:status==='error'?<><h2>We couldn't connect.</h2><ErrorNotice message={error||'Please check your connection and try again.'}/><Button onClick={onRetry}>Try again</Button></>:<><h2>Welcome back.</h2><p>Sign in to pick up where you left off.</p><form onSubmit={submit}><Field label="Email address" name="email" type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/><Field label="Password" name="password" type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password"/>{message&&<ErrorNotice message={message}/>}<Button type="submit" disabled={busy}>{busy?'Signing in…':'Enter your space'}<ArrowUpRight size={17}/></Button></form></>}</LoginFrame>
+import { useState, type ReactNode, type FormEvent } from "react";
+import { ArrowUpRight, LockKeyhole } from "lucide-react";
+import { Brand, Button, Field, ErrorNotice } from "../components/Ui";
+export function LoginFrame({ children }: { children: ReactNode }) {
+  return (
+    <div className="login-layout">
+      <header>
+        <Brand />
+        <span className="private-pill">
+          <span className="status-dot" />
+          Private workspace
+        </span>
+      </header>
+      <div className="login-content">
+        <div className="login-intro">
+          <span className="eyebrow">A LITTLE MORE INTENTIONAL. EVERY DAY.</span>
+          <h1>
+            Your fitness,
+            <br />
+            <span>in focus.</span>
+          </h1>
+          <p>
+            A personal space for your training, nutrition, and the progress in
+            between.
+          </p>
+          <div className="login-orbit" aria-hidden="true">
+            <div />
+            <div />
+            <div />
+            <span>
+              MOVE.
+              <br />
+              FUEL.
+              <br />
+              REPEAT.
+            </span>
+          </div>
+        </div>
+        <section className="login-card">
+          {children}
+          <span className="login-footnote">
+            <LockKeyhole size={10} /> Personal tracking. One owner. All yours.
+          </span>
+        </section>
+      </div>
+    </div>
+  );
+}
+export function LoginPage({
+  status,
+  error,
+  onSignIn,
+  onSignOut,
+  onRetry,
+}: {
+  status: string;
+  error?: string;
+  onSignIn: (email: string, password: string) => Promise<void>;
+  onSignOut: () => Promise<void>;
+  onRetry: () => void;
+}) {
+  const [email, setEmail] = useState(""),
+    [password, setPassword] = useState(""),
+    [message, setMessage] = useState(""),
+    [busy, setBusy] = useState(false);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      await onSignIn(email.trim(), password);
+    } catch (e) {
+      setMessage((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <LoginFrame>
+      <span className="eyebrow">WELCOME TO AKSHATH.FIT</span>
+      {status === "setup-required" ? (
+        <>
+          <h2>Your space is almost ready.</h2>
+          <p>Connect your Supabase project to enable your private sign-in.</p>
+          <div className="setup-note">
+            Your dashboard will open after your project and owner account are
+            configured.
+          </div>
+        </>
+      ) : status === "checking" ? (
+        <>
+          <h2>Opening your space.</h2>
+          <div className="loading-page" style={{ minHeight: 120 }}>
+            <span className="spinner" />
+            <p>Checking your account…</p>
+          </div>
+        </>
+      ) : status === "unauthorized" ? (
+        <>
+          <h2>Owner access only.</h2>
+          <ErrorNotice message="This account is not authorized to open this dashboard." />
+          <Button
+            variant="secondary"
+            onClick={() => {
+              void onSignOut().catch((e) => setMessage(e.message));
+            }}
+          >
+            Use another account
+          </Button>
+          {message && <ErrorNotice message={message} />}
+        </>
+      ) : status === "error" ? (
+        <>
+          <h2>We couldn't connect.</h2>
+          <ErrorNotice
+            message={error || "Please check your connection and try again."}
+          />
+          <Button onClick={onRetry}>Try again</Button>
+        </>
+      ) : (
+        <>
+          <h2>Welcome back.</h2>
+          <p>Sign in to pick up where you left off.</p>
+          <form onSubmit={submit}>
+            <Field
+              label="Email address"
+              name="email"
+              type="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+            <Field
+              label="Password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+            />
+            {message && <ErrorNotice message={message} />}
+            <Button type="submit" disabled={busy}>
+              {busy ? "Signing in…" : "Enter your space"}
+              <ArrowUpRight size={17} />
+            </Button>
+          </form>
+        </>
+      )}
+    </LoginFrame>
+  );
 }

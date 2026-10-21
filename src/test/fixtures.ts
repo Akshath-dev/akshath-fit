@@ -1,2 +1,26 @@
-import type {DashboardSnapshot} from '../lib/types';
-export function emptySnapshot():DashboardSnapshot{return {profile:{userId:'owner',displayName:'Akshath',timeZone:'Asia/Kolkata'},goals:{calories:1900,protein:150,carbs:190,fat:55,steps:null,weeklyTraining:null},muscleGroups:[{id:'chest',name:'Chest',isCustom:false},{id:'back',name:'Back',isCustom:false}],training:[],nutrition:[],checkins:[],latestWeight:null}}
+import type { DashboardSnapshot } from "../lib/types";
+export function emptySnapshot(): DashboardSnapshot {
+  return {
+    profile: {
+      userId: "owner",
+      displayName: "Akshath",
+      timeZone: "Asia/Kolkata",
+    },
+    goals: {
+      calories: 1900,
+      protein: 150,
+      carbs: 190,
+      fat: 55,
+      steps: null,
+      weeklyTraining: null,
+    },
+    muscleGroups: [
+      { id: "chest", name: "Chest", isCustom: false },
+      { id: "back", name: "Back", isCustom: false },
+    ],
+    training: [],
+    nutrition: [],
+    checkins: [],
+    latestWeight: null,
+  };
+}
