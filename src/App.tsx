@@ -1,3 +1,9 @@
-import {Brand} from './components/Ui';
+import {useMemo} from 'react';
+import {createClient} from '@supabase/supabase-js';
+import {AuthProvider,useAuth} from './auth/AuthProvider';
+import {readPublicConfig} from './lib/config';
+import {AppShell} from './components/AppShell';
+import {EmptyState} from './components/Ui';
 import './styles.css';
-export default function App(){return <div className="login-layout"><header><Brand/><span className="private-pill"><span className="status-dot"/>Private workspace</span></header><div className="login-content"><div className="login-intro"><span className="eyebrow">A LITTLE MORE INTENTIONAL. EVERY DAY.</span><h1>Your fitness,<br/><span>in focus.</span></h1><p>A personal space for your training, nutrition, and the progress in between.</p><div className="login-orbit"><div/><div/><div/><span>MOVE.<br/>FUEL.<br/>REPEAT.</span></div></div><section className="login-card"><span className="eyebrow">WELCOME TO AKSHATH.FIT</span><h2>Your space is almost ready.</h2><p>Connect your Supabase project to enable your private sign-in.</p><div className="setup-note">Your dashboard will open after your project and owner account are configured.</div><span className="login-footnote">Personal tracking. One owner. All yours.</span></section></div></div>}
+function OwnerApp(){const{signOut}=useAuth();return <AppShell route="overview" onNavigate={()=>{}} onSignOut={()=>{void signOut()}}><EmptyState title="Your private space is ready." description="Your training, nutrition, and progress will live here."/></AppShell>}
+export default function App(){const client=useMemo(()=>{const config=readPublicConfig(import.meta.env);return config?createClient(config.url,config.publishableKey):null},[]);return <AuthProvider client={client}><OwnerApp/></AuthProvider>}
