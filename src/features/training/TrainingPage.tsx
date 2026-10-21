@@ -31,7 +31,7 @@ export function TrainingPage({
       (s) => s.date >= range.start && s.date <= range.end,
     ),
     rows = snapshot.training.filter(
-      (s) => filter === "all" || s.kind === filter,
+      (s) => s.date <= selectedDate && (filter === "all" || s.kind === filter),
     );
   return (
     <div className="page-stack">

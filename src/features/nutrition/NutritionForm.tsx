@@ -49,9 +49,12 @@ export function NutritionForm({
         type="date"
         required
         value={v.date}
-        onChange={(e) => update("date", e.target.value)}
+        readOnly
         error={errors.date}
       />
+      <p className="form-hint">
+        To log another day, close this form and select that date.
+      </p>
       <div className="form-grid">
         {(["calories", "protein", "carbs", "fat"] as const).map((key) => (
           <Field

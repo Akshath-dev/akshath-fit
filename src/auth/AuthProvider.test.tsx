@@ -169,3 +169,67 @@ it("cannot restore owner content while sign-out is still in flight", async () =>
   await act(async () => approve({ data: true, error: null }));
   expect(screen.queryByText("Owner content")).not.toBeInTheDocument();
 });
+
+it("blocks auth events arriving after intentional sign-out begins", async () => {
+  const f = fake();
+  vi.spyOn(f.client.auth, "signOut").mockImplementation(
+    () => new Promise(() => {}),
+  );
+  render(
+    <AuthProvider client={f.client}>
+      <Draft />
+    </AuthProvider>,
+  );
+  await screen.findByText("Owner content");
+  await userEvent.click(screen.getByRole("button", { name: "Log out" }));
+  act(() => f.emit({ user: { id: "owner" } }));
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 10));
+  });
+  expect(screen.queryByText("Owner content")).not.toBeInTheDocument();
+});
+
+it("expires private content and ignores an outstanding refresh approval", async () => {
+  vi.useFakeTimers();
+  try {
+    const f = fake();
+    vi.spyOn(f.client.auth, "getSession").mockResolvedValue({
+      data: {
+        session: {
+          user: { id: "owner" },
+          expires_at: Math.floor(Date.now() / 1000) + 2,
+        } as any,
+      },
+      error: null,
+    });
+    render(
+      <AuthProvider client={f.client}>
+        <Draft />
+      </AuthProvider>,
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(screen.getByText("Owner content")).toBeInTheDocument();
+    let approve!: (value: unknown) => void;
+    f.setApproval(
+      new Promise((r) => {
+        approve = r;
+      }),
+    );
+    act(() =>
+      f.emit({
+        user: { id: "owner" },
+        expires_at: Math.floor(Date.now() / 1000) + 1,
+      }),
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100);
+    });
+    expect(screen.queryByText("Owner content")).not.toBeInTheDocument();
+    await act(async () => approve({ data: true, error: null }));
+    expect(screen.queryByText("Owner content")).not.toBeInTheDocument();
+  } finally {
+    vi.useRealTimers();
+  }
+});

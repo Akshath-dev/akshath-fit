@@ -30,7 +30,8 @@ export function AuthProvider({
   client: SupabaseClient | null;
   children: ReactNode;
 }) {
-  const generation = useRef(0);
+  const generation = useRef(0),
+    logoutBarrier = useRef(false);
   const [state, setState] = useState<State>({
       status: client ? "checking" : "setup-required",
     }),
@@ -43,12 +44,28 @@ export function AuthProvider({
     let mounted = true,
       eventSeen = false;
     const timers = new Set<ReturnType<typeof setTimeout>>();
+    let expiryTimer: ReturnType<typeof setTimeout> | undefined;
     function verify(session: Session | null) {
       const mine = ++generation.current;
       if (!mounted) return;
-      if (!session) {
+      if (expiryTimer) clearTimeout(expiryTimer);
+      if (
+        !session ||
+        logoutBarrier.current ||
+        (session.expires_at && session.expires_at * 1000 <= Date.now())
+      ) {
         setState({ status: "signed-out" });
         return;
+      }
+      if (session.expires_at) {
+        expiryTimer = setTimeout(
+          () => {
+            if (!mounted || mine !== generation.current) return;
+            generation.current++;
+            setState({ status: "signed-out" });
+          },
+          Math.min(session.expires_at * 1000 - Date.now(), 2_147_483_647),
+        );
       }
       setState((current) =>
         current.status === "ready" && current.userId === session.user.id
@@ -63,6 +80,11 @@ export function AuthProvider({
             const { data, error } = await client!.rpc("owner_access");
             if (!mounted || mine !== generation.current) return;
             if (error) throw error;
+            if (session.expires_at && session.expires_at * 1000 <= Date.now()) {
+              generation.current++;
+              setState({ status: "signed-out" });
+              return;
+            }
             setState(
               data === true
                 ? { status: "ready", userId: session.user.id }
@@ -95,16 +117,19 @@ export function AuthProvider({
       mounted = false;
       generation.current++;
       timers.forEach(clearTimeout);
+      if (expiryTimer) clearTimeout(expiryTimer);
       data.subscription.unsubscribe();
     };
   }, [client, attempt]);
   async function signOut() {
-    generation.current++;
+    logoutBarrier.current = true;
+    const mine = ++generation.current;
     setState({ status: "signed-out" });
     if (client) {
       const { error } = await client.auth.signOut({ scope: "local" });
       if (error) {
-        setState({ status: "error", message: error.message });
+        if (mine === generation.current)
+          setState({ status: "error", message: error.message });
         throw error;
       }
     }
@@ -113,6 +138,8 @@ export function AuthProvider({
     if (!client) throw new Error("Connect your Supabase project first.");
     const { error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
+    logoutBarrier.current = false;
+    setAttempt((x) => x + 1);
   }
   const repository = useMemo(
     () =>

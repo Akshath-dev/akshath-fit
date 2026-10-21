@@ -2,7 +2,6 @@ import type {
   DashboardSnapshot,
   DateRange,
   TrainingInput,
-  TrainingSession,
   NutritionInput,
   CheckinInput,
   Profile,
@@ -15,7 +14,7 @@ export interface FitnessRepository {
     range: DateRange,
     signal?: AbortSignal,
   ): Promise<DashboardSnapshot>;
-  saveTraining(input: TrainingInput): Promise<TrainingSession>;
+  saveTraining(input: TrainingInput): Promise<void>;
   deleteTraining(id: string): Promise<void>;
   saveNutrition(input: NutritionInput): Promise<NutritionInput>;
   deleteNutrition(date: LocalDate): Promise<void>;

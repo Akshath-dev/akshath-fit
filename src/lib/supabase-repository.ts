@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { weekRange } from "./dates";
 import type { FitnessRepository } from "./repository";
 import type {
   Profile,
@@ -115,7 +116,7 @@ export function createFitnessRepository(
             .select("*,session_muscle_groups(muscle_group_id)")
             .eq("user_id", ownerId)
             .gte("date", range.start)
-            .lte("date", range.end)
+            .lte("date", weekRange(range.end).end)
             .order("date", { ascending: false })
             .order("created_at", { ascending: false })
             .abortSignal(sig),
@@ -163,7 +164,9 @@ export function createFitnessRepository(
       };
     },
     async saveTraining(input) {
-      const id = await result(
+      // The RPC response confirms the transaction committed. Refresh errors must
+      // not turn that acknowledgement into a retryable insertion failure.
+      await result(
         client.rpc("save_training_session", {
           p_id: input.id || null,
           p_date: input.date,
@@ -175,17 +178,6 @@ export function createFitnessRepository(
           p_muscle_group_ids: input.muscleGroupIds,
         }),
       );
-      const saved = await result(
-        client
-          .from("training_sessions")
-          .select("*,session_muscle_groups(muscle_group_id)")
-          .eq("user_id", ownerId)
-          .eq("id", id)
-          .single(),
-      );
-      if (!saved)
-        throw new Error("Could not reload this session. Please refresh.");
-      return training(saved);
     },
     async deleteTraining(id) {
       await result(

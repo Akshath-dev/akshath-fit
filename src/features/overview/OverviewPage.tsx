@@ -38,7 +38,9 @@ export function OverviewPage({
     c = s.checkinToday,
     todayTraining = snapshot.training.filter((t) => t.date === selectedDate),
     weightPoints = snapshot.checkins.filter((c) => c.weightKg != null),
-    recent = snapshot.training.slice(0, 3);
+    recent = snapshot.training
+      .filter((s) => s.date <= selectedDate)
+      .slice(0, 3);
   const priorities = [
     {
       label: c?.restDay ? "Rest & recover" : "Log your movement",

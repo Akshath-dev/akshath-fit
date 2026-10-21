@@ -105,7 +105,7 @@ type ValidationResult<T> = { ok: true; value: T } |
 
 ```ts
 getSnapshot(range: DateRange, signal?: AbortSignal): Promise<DashboardSnapshot>;
-saveTraining(input: TrainingInput): Promise<TrainingSession>;
+saveTraining(input: TrainingInput): Promise<void>;
 deleteTraining(id: string): Promise<void>;
 saveNutrition(input: NutritionInput): Promise<NutritionInput>;
 deleteNutrition(date: LocalDate): Promise<void>;
@@ -116,7 +116,7 @@ saveSettings(profile: Pick<Profile, 'displayName' | 'timeZone'>, goals: Goals):
 addMuscleGroup(name: string): Promise<MuscleGroup>;
 ```
 
-Repository methods throw normalized errors, keep null distinct from zero, and never claim successful persistence without a database response. The owner identity comes from the verified session, never from form values. `getSnapshot` includes the latest non-null weight at or before `range.end`, even if it predates `range.start`.
+Repository methods throw normalized errors, keep null distinct from zero, and never claim successful persistence without a database response. The owner identity comes from the verified session, never from form values. `getSnapshot` includes the latest non-null weight at or before `range.end`, even if it predates `range.start`. Training includes the selected week through Sunday for weekly summaries; daily metrics and rolling histories stay bounded to the selected date. `saveTraining` resolves on the committed RPC acknowledgement; refresh is separate so a read failure cannot turn a confirmed insert into a retryable save error.
 
 ### Task 1: Create the application foundation and reference-inspired shell
 

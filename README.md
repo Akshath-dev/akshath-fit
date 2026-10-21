@@ -69,6 +69,9 @@ Routes use `/#/overview`, `/#/training`, and similar hashes, allowing refresh/di
 
 ## Data behavior
 
+- Choose the dashboard date before opening nutrition or check-in forms. Their date is fixed to prevent overwriting another day while editing.
+- Weekly training summaries include the whole Monday–Sunday week, while daily metrics and journals stop at the selected date.
+- A confirmed workout save is separate from refreshing the dashboard. If refreshing fails, use Retry to reload records.
 - Daily nutrition and check-ins are upserted by owner/date. Blank values stay unknown; zero is recorded as zero. Saving nutrition updates that date's daily totals rather than adding a meal.
 - Strength sessions have multiple muscle groups but count as one session. Cardio distance is separate from step count.
 - Adding a workout clears a matching rest-day marker. Existing steps and measurements are retained.

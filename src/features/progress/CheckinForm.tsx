@@ -50,9 +50,12 @@ export function CheckinForm({
         type="date"
         required
         value={v.date}
-        onChange={(e) => update("date", e.target.value)}
+        readOnly
         error={errors.date}
       />
+      <p className="form-hint">
+        To log another day, close this form and select that date.
+      </p>
       <Field
         label="Steps"
         type="number"

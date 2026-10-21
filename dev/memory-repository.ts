@@ -1,3 +1,4 @@
+import { weekRange } from "../src/lib/dates";
 // DESIGN_PREVIEW_ONLY: Synthetic fixtures for local visual QA. Never imported by the production entry.
 import type { FitnessRepository } from "../src/lib/repository";
 import type {
@@ -135,7 +136,9 @@ export function createMemoryRepository({
       if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
       const s = clone(data);
       s.training = s.training
-        .filter((r) => r.date >= range.start && r.date <= range.end)
+        .filter(
+          (r) => r.date >= range.start && r.date <= weekRange(range.end).end,
+        )
         .sort(
           (a, b) =>
             b.date.localeCompare(a.date) ||
@@ -168,7 +171,6 @@ export function createMemoryRepository({
       else data.training[i] = row;
       const c = data.checkins.find((c) => c.date === row.date);
       if (c) c.restDay = false;
-      return clone(row);
     },
     async deleteTraining(id) {
       writing();
