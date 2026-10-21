@@ -11,3 +11,4 @@ export type CheckinInput = {date:LocalDate;steps:number|null;weightKg:number|nul
 export type DateRange = {start:LocalDate;end:LocalDate};
 export type DashboardSnapshot = {profile:Profile;goals:Goals;muscleGroups:MuscleGroup[];training:TrainingSession[];nutrition:NutritionInput[];checkins:CheckinInput[];latestWeight:CheckinInput|null};
 export type ValidationResult<T> = {ok:true;value:T}|{ok:false;errors:Record<string,string>};
+export type EditorRequest={type:'training';kind?:SessionKind;initial?:TrainingSession}|{type:'nutrition';initial?:NutritionInput}|{type:'checkin';initial?:CheckinInput}|{type:'delete';target:'training'|'nutrition'|'checkin';id:string;label:string};
