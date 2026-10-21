@@ -2,7 +2,7 @@
 
 Date: 2026-10-21
 
-Status: Proposed design for user review. Application implementation has not started.
+Status: Approved at a high level by the user on 2026-10-21. Application implementation has not started.
 
 ## Purpose and confirmed requirements
 
