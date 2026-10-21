@@ -1,6 +1,6 @@
-const TARGETS = { kcal: 1900, protein: 150, carbs: 190, fat: 55 };
+export const TARGETS = { kcal: 1900, protein: 150, carbs: 190, fat: 55 };
 
-const DAYS = [
+export const DAYS = [
   {
     id: "monday",
     title: "Monday — Travel Day",
@@ -81,7 +81,7 @@ const DAYS = [
   }
 ];
 
-const WORKOUT_NUTRITION = [
+export const WORKOUT_NUTRITION = [
   { title: "⚡ Pre-Workout (60-90 min before)", items: [
     "Paneer cubes / boiled eggs + banana = protein + quick carbs",
     "Black coffee 30 min before for focus & performance boost",
@@ -110,7 +110,7 @@ const WORKOUT_NUTRITION = [
   ]}
 ];
 
-const GROCERY = [
+export const GROCERY = [
   { cat: "🥩 Protein", items: [
     { name: "Chicken breast/thigh", qty: "2 kg/week", cost: "₹500-600" },
     { name: "Eggs", qty: "36/week (3 trays)", cost: "₹240-300" },
@@ -140,7 +140,7 @@ const GROCERY = [
   ]}
 ];
 
-const MEAL_PREP = [
+export const MEAL_PREP = [
   { title: "🗓️ Sunday Prep (1.5-2 hours)", items: [
     "Boil 15-18 eggs → store in fridge (lasts all week)",
     "Grill/cook 1kg chicken breast → portion into 5 boxes",
@@ -165,7 +165,7 @@ const MEAL_PREP = [
   ]}
 ];
 
-const SUPPLEMENTS = [
+export const SUPPLEMENTS = [
   { name: "Whey Protein (start after Month 1)", dose: "1-2 scoops/day", why: "Will make hitting 150g easier — start after first month", priority: "Later" },
   { name: "Creatine Monohydrate", dose: "5g daily with water", why: "Strength, recovery, muscle fullness", priority: "Highly Recommended" },
   { name: "Vitamin D3", dose: "2000-4000 IU/day", why: "Most Indians are deficient; supports recovery", priority: "Recommended" },
@@ -174,7 +174,7 @@ const SUPPLEMENTS = [
   { name: "Multivitamin", dose: "1/day with breakfast", why: "Cover micronutrient gaps during calorie deficit", priority: "Optional" }
 ];
 
-const SUBSTITUTIONS = [
+export const SUBSTITUTIONS = [
   { original: "Chicken breast", alts: "Chicken thigh (slightly more fat), fish (rohu/pomfret), soya chunks (budget option)" },
   { original: "Brown rice", alts: "White rice (similar cals), quinoa, daliya (broken wheat)" },
   { original: "Whole wheat roti", alts: "Jowar/bajra roti, rice roti, oats roti" },
@@ -185,7 +185,7 @@ const SUBSTITUTIONS = [
   { original: "Apple/guava", alts: "Any seasonal fruit — papaya, orange, muskmelon" }
 ];
 
-const AVOID_FOODS = [
+export const AVOID_FOODS = [
   "Fried snacks — samosa, pakora, bhujia (high cal, low protein)",
   "Sugary drinks — cola, packaged juice, energy drinks",
   "Excessive oil/ghee — limit to 2-3 tsp/day total",
@@ -196,7 +196,7 @@ const AVOID_FOODS = [
   "Instant noodles — low protein, high sodium"
 ];
 
-const CHEAT_MEAL = [
+export const CHEAT_MEAL = [
   "Schedule 1 flexible meal per week (Saturday lunch ideal)",
   "Keep it to ONE meal, not an entire cheat day",
   "Good options: biryani, butter chicken + naan, rajma-chawal extra portion",
@@ -206,7 +206,7 @@ const CHEAT_MEAL = [
   "Avoid making it an all-you-can-eat binge"
 ];
 
-const TRAINING_DAYS = [
+export const TRAINING_DAYS = [
   { id:1, label:"DAY 1", title:"Upper Body Strength", tag:"STRENGTH", color:"#FF6B35", icon:"💪",
     exercises: [
       { name:"Bench Press", sets:3, reps:"8", load:"No weight / 5kg each side" },
@@ -267,7 +267,7 @@ const TRAINING_DAYS = [
     ]}
 ];
 
-const COACH_NOTES = {
+export const COACH_NOTES = {
   1: "Focus on form over load. Keep shoulders retracted on bench. Controlled negatives on pull-ups.",
   2: "Brace your core throughout. Hip hinge pattern on RDL is key — don't round lower back.",
   3: "Stay consistent on pacing. Conditioning is about building aerobic base — don't go all-out.",
