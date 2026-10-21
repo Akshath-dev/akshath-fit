@@ -57,7 +57,7 @@ After connecting the hosted project, verify:
 
 ## Deploy on the existing domain
 
-The repository includes a manually triggered GitHub Pages deployment workflow. The existing Pages configuration was observed on 2026-10-21 as legacy deployment from `main` at `/`, with custom domain `akshath.fit`. The new build will require switching to Actions when you are ready to publish. Backend setup and hosted checks must be complete before replacing the live site.
+The dashboard is published at **https://akshath.fit/** using GitHub Actions and GitHub Pages, with HTTPS enforced. The first dashboard release was deployed on 2026-10-21 from commit `8a9be11`; see [the release verification record](docs/verification/2026-10-21-production-release.md). The workflow remains manually triggered for future releases. Public Supabase build settings are configured as repository Actions variables.
 
 1. Put this branch through review and integrate it into your chosen deployment branch.
 2. Add repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` with the same public settings as local development.
